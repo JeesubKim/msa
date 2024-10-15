@@ -19,9 +19,9 @@ class Post(BaseModel):
 
 class Event(BaseModel):
     event_type: str
-    data: dict = None
+    data: dict
 
-app = FastAPI()
+app = FastAPI() 
 
 app.add_middleware(
     CORSMiddleware,

@@ -28,14 +28,9 @@ commentsByPostId = {}
 class Comment(BaseModel):
     content:str
 
-class CommentEventData(BaseModel):
-    id:str
-    content:str
-    post_id:str
-
 class Event(BaseModel):
     event_type: str
-    data: CommentEventData
+    data: dict
 
 @app.get("/posts/{id}/comments", status_code=200)
 def read_comments(id:str):

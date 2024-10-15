@@ -1,4 +1,3 @@
-from typing import Dict, Any
 from uuid import uuid4, UUID
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -24,26 +23,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+posts = {}
 
 class Event(BaseModel):
     event_type: str
     data: dict
 
 
-target_services = [
-    "http://localhost:4000/events",
-    "http://localhost:4001/events",
-    "http://localhost:4002/events",
-]
+@app.get("/posts", status_code=200)
+def get_query():
+
+    return posts
 
 @app.post("/events", status_code=201)
-def write_events(body: Event):
-    print("Event received: ", body.event_type)
-    print(body.json())
-    for service in target_services:
-        
-        requests.post(service, json=body.dict())
+def write_events(body:Event):
+    
+    
+    event_type = body.event_type
+    data = body.data
 
+    if event_type == "PostCreated":
+        id = data["id"]
+        
+        posts[id] = {
+            "id": id,
+            "title": data["title"],
+            "content": data["content"],
+            "comments":[]
+        }
+
+    elif event_type == "CommentCreated":
+        id = data["id"]
+        content = data["content"]
+        post_id = data["post_id"]
+        
+        post = posts[post_id]
+
+        post["comments"].append({
+            "id":id,
+            "content":content
+        })
+    
+    
 
     return { "status" : "OK" }
