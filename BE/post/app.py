@@ -1,19 +1,25 @@
 from uuid import uuid4
 from fastapi import FastAPI
 from pydantic import BaseModel
-
+import requests
 from fastapi.middleware.cors import CORSMiddleware
 origins = [
     "http://localhost",
     "http://localhost:8080",
     "http://localhost:4000",
     "http://localhost:4001",
+    "http://localhost:4002",
+    "http://localhost:4005",
     "http://localhost:3000"
 ]
 
 class Post(BaseModel):
     title:str
     content:str
+
+class Event(BaseModel):
+    event_type: str
+    data: dict = None
 
 app = FastAPI()
 
@@ -48,6 +54,20 @@ def write_post(post:Post):
         "content":post.content
     }
 
+    requests.post("http://localhost:4005/events", json={
+        "event_type":"PostCreated",
+        "data": {
+            "id": post_id,
+            "title": post.title,
+            "content": post.content
+        }
+    })
     return postsById[post_id]
 
 
+
+@app.post("/events", status_code=201)
+def write_events(body:Event):
+    print("Received Event", body.type)
+
+    return {}
