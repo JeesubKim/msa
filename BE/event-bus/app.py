@@ -38,13 +38,23 @@ target_services = [
     "http://localhost:4003/events",
 ]
 
+events = []
+
 @app.post("/events", status_code=201)
 def write_events(body: Event):
     print("Event received: ", body.event_type)
     
+    events.append(body)
+
     for service in target_services:
         
         requests.post(service, json=body.dict())
 
 
     return { "status" : "OK" }
+
+
+
+@app.get("/events", status_code=200)
+def read_events():
+    return events

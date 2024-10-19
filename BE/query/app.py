@@ -30,6 +30,17 @@ class Event(BaseModel):
     data: dict
 
 
+@app.on_event("startup")
+def startup_event():
+    response = requests.get("http://localhost:4005/events")
+    events = response.json()
+    print(response.json())
+    for event in events:
+        
+        event_type = event.get("event_type")
+        data = event.get("data")
+        handle_events(event_type, data)
+
 @app.get("/posts", status_code=200)
 def get_query():
 
@@ -42,6 +53,12 @@ def write_events(body:Event):
     event_type = body.event_type
     data = body.data
 
+    handle_events(event_type, data)
+
+    return { "status" : "OK" }
+
+
+def handle_events(event_type, data):
     if event_type == "PostCreated":
         id = data["id"]
         
@@ -76,6 +93,3 @@ def write_events(body:Event):
 
         comment["status"] = status
         comment["content"] = content
-
-
-    return { "status" : "OK" }

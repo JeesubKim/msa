@@ -39,11 +39,29 @@ target_services = [
     "http://localhost:4002/events",
 ]
 
+@app.on_event("startup")
+def startup_event():
+    response = requests.get("http://localhost:4005/events")
+    events = response.json()
+    for event in events:
+        print(event)
+        event_type = event.get("event_type")
+        data = event.get("data")
+        handle_events(event_type, data)
+
+
 @app.post("/events", status_code=201)
 def write_events(body: Event):
     print("Event received: ", body.event_type)
     event_type = body.event_type
     data = body.data
+
+    handle_events(event_type, data)    
+
+    return { "status" : "OK" }
+
+
+def handle_events(event_type, data):
     if event_type == "CommentCreated":
         status = "rejected" if "orange" in data.get("content","") else "approved"
         requests.post("http://localhost:4005/events", json={
@@ -55,6 +73,3 @@ def write_events(body: Event):
                 "content": data.get("content")
             }
         })
-
-
-    return { "status" : "OK" }
