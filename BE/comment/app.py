@@ -47,16 +47,18 @@ def write_comments(id:str, body:Comment):
     
     comments.append({
         "id": comment_id,
-        "content": body.content
+        "content": body.content,
+        "status": "pending"
     })
     commentsByPostId[id] = comments
     
     requests.post("http://localhost:4005/events", json={
-        "event_type":"CommentCreated",
+        "event_type": "CommentCreated",
         "data": {
             "id": comment_id,
             "content": body.content,
-            "post_id": id
+            "status": "pending",
+            "post_id": id,
         }
     })
     
@@ -66,6 +68,31 @@ def write_comments(id:str, body:Comment):
 
 @app.post("/events", status_code=201)
 def write_events(body:Event):
-    print("Received Event", body.type)
+    print("Received Event", body.event_type)
 
+    event_type = body.event_type
+    data = body.data
+    if event_type == "CommentModerated":
+        post_id = data.get("post_id")
+        id = data.get("id")
+        status = data.get("status")
+        content = data.get("content")
+        comments:list = commentsByPostId.get(post_id, [])
+
+        comment = { "result": item for item in comments if item.get("id") == id }["result"]
+
+        comment["status"] = status
+
+        print(comment)
+        print(commentsByPostId)
+
+        requests.post("http://localhost:4005/events", json={
+            "event_type": "CommentUpdated",
+            "data": {
+                "id": id,
+                "status": status,
+                "content": content,
+                "post_id": post_id
+            }
+        })
     return {}

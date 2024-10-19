@@ -56,14 +56,26 @@ def write_events(body:Event):
         id = data["id"]
         content = data["content"]
         post_id = data["post_id"]
-        
+        status = data["status"]
         post = posts[post_id]
 
         post["comments"].append({
             "id":id,
-            "content":content
+            "content":content,
+            "status":status
         })
     
-    
+    elif event_type == "CommentUpdated":
+        id = data["id"]
+        content = data["content"]
+        post_id = data["post_id"]
+        status = data["status"]
+        post = posts[post_id]
+        comments = post["comments"]
+        comment = { "result": item for item in comments if item.get("id") == id }["result"]
+
+        comment["status"] = status
+        comment["content"] = content
+
 
     return { "status" : "OK" }

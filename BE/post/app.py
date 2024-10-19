@@ -68,6 +68,6 @@ def write_post(post:Post):
 
 @app.post("/events", status_code=201)
 def write_events(body:Event):
-    print("Received Event", body.type)
+    print("Received Event", body.event_type)
 
     return {}
