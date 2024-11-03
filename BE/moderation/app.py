@@ -7,12 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 origins = [
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:4000", #post
-    "http://localhost:4001", #comment
-    "http://localhost:4002", #query
-    "http://localhost:4003", #moderation
-
-    "http://localhost:4005", #event-bus
+    "http://post-clusterip-srv:4000",
+    "http://comment-srv:4001",
+    "http://query-srv:4002",
+    "http://event-bus-srv:4005",
     "http://localhost:3000"
 ]
 
@@ -34,14 +32,14 @@ class Event(BaseModel):
 
 
 target_services = [
-    "http://localhost:4000/events",
-    "http://localhost:4001/events",
-    "http://localhost:4002/events",
+    "http://post-clusterip-srv:4000/events",
+    "http://comment-srv:4001/events",
+    "http://query-srv:4002/events",
 ]
 
 @app.on_event("startup")
 def startup_event():
-    response = requests.get("http://localhost:4005/events")
+    response = requests.get("http://event-bus-srv:4005/events")
     events = response.json()
     for event in events:
         print(event)
@@ -64,7 +62,7 @@ def write_events(body: Event):
 def handle_events(event_type, data):
     if event_type == "CommentCreated":
         status = "rejected" if "orange" in data.get("content","") else "approved"
-        requests.post("http://localhost:4005/events", json={
+        requests.post("http://event-bus-srv:4005/events", json={
             "event_type": "CommentModerated",
             "data": {
                 "id": data.get("id"),

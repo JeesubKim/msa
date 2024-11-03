@@ -6,12 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 origins = [
     "http://localhost",
     "http://localhost:8080",
-    "http://localhost:4000",
-    "http://localhost:4001",
-    "http://localhost:4002",
-    "http://localhost:4005",
+    "http://post-clusterip-srv:4000",
+    "http://comment-srv:4001",
+    "http://query-srv:4002",
+    "http://event-bus-srv:4005",
     "http://localhost:3000"
 ]
+
 
 class Post(BaseModel):
     title:str
@@ -54,7 +55,7 @@ def write_post(post:Post):
         "content":post.content
     }
 
-    requests.post("http://localhost:4005/events", json={
+    requests.post("http://event-bus-srv:4005/events", json={
         "event_type":"PostCreated",
         "data": {
             "id": post_id,

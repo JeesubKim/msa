@@ -1,1 +1,1 @@
-fastapi dev app.py --port=4002
+fastapi dev app.py --host 0.0.0.0 --port=4002

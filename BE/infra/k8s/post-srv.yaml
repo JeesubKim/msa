@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: post-srv
+spec:
+  type: NodePort
+  selector: #What pod should be exposed
+    app: post
+  ports:
+    - name: post
+      protocol: TCP
+      port: 4000 # Port of Node port service which is entry port and it will redirect to targetPort that is where mapped with pod's port
+      targetPort: 4000 # Actual port that our application is connected to
